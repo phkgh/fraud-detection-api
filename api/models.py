@@ -28,10 +28,25 @@ class IPAddressLog(models.Model):
 class JobApplication(models.Model):
     job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
-    ip_address = models.ForeignKey(
-        IPAddressLog, on_delete=models.SET_NULL, null=True, blank=True)
+    ip_address = models.ForeignKey(IPAddressLog, on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
     is_flagged = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        if not self.pk:  # only for new objects
+            threshold = timezone.now() - timedelta(minutes=5)
+            duplicates = JobApplication.objects.filter(
+                job_post=self.job_post,
+                resume=self.resume,
+                ip_address=self.ip_address,
+                timestamp__gte=threshold
+            )
+            self.is_flagged = duplicates.exists()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Application to {self.job_post} from {self.ip_address}"
+        return f"Application to {self.job_post.title} from {self.ip_address.ip_address}"
