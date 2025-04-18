@@ -1,12 +1,25 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+
+# Environment files
 .env
-db.sqlite3
-*.log
-*.pot
-*.py[cod]
 .env.*
-__pycache__/
+
+# SQLite database
+*.sqlite3
+db.sqlite3
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Translations
+*.pot
+
+# macOS
 *.DS_Store
