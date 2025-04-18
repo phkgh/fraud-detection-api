@@ -1,3 +1,6 @@
+from django.urls import path
+from api.views import stats_view
+from api.views import stats_view
 from rest_framework.routers import DefaultRouter
 from .views import JobPostViewSet, ResumeViewSet, IPAddressLogViewSet, JobApplicationViewSet
 
@@ -8,4 +11,9 @@ router.register(r'ips', IPAddressLogViewSet, basename='ipaddresslog')
 router.register(r'applications', JobApplicationViewSet,
                 basename='jobapplication')
 
-urlpatterns = router.urls  # ✅ This is required so Django knows what to include
+urlpatterns = router.urls  # To make Django know what to include
+
+
+urlpatterns += [
+    path('stats/', stats_view, name='stats'),
+]

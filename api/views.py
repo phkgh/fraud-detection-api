@@ -1,3 +1,6 @@
+from rest_framework.decorators import api_view
+from api.models import JobApplication, JobPost, Resume, IPAddressLog
+from rest_framework.response import Response
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
@@ -36,3 +39,19 @@ class JobApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['job_post', 'resume', 'ip_address', 'is_flagged']
     ordering_fields = ['timestamp', 'id']
     ordering = ['-timestamp']  # default
+
+
+@api_view(['GET'])
+def stats_view(request):
+    total_apps = JobApplication.objects.count()
+    flagged_apps = JobApplication.objects.filter(is_flagged=True).count()
+    flagged_pct = (flagged_apps / total_apps) * 100 if total_apps else 0
+
+    return Response({
+        'total_applications': total_apps,
+        'flagged_applications': flagged_apps,
+        'flagged_percentage': round(flagged_pct, 2),
+        'total_jobs': JobPost.objects.count(),
+        'total_resumes': Resume.objects.count(),
+        'total_ips': IPAddressLog.objects.count(),
+    })
