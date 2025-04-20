@@ -27,18 +27,35 @@ Then access:
 
 **Project Structure:**
 
+## Project Structure
+
+.
 ├── api/
-│   ├── models.py
-│   ├── views.py
-│   ├── serializers.py
-│   ├── pagination.py
-│   ├── urls.py
-│   ├── tests_api/
+ │   ├── **init**.py
+ │   ├── admin.py
+ │   ├── apps.py
+ │   ├── models.py
+ │   ├── pagination.py
+ │   ├── serializers.py
+ │   ├── urls.py
+ │   ├── views.py
+ │   ├── tests_api/
+ │   │   └── test_applications.py
+ │   ├── management/
+ │   │   └── commands/
+ │   │       └── reseed_and_flag.py
 ├── fraud_system/
-│   ├── settings.py
-│   ├── urls.py
-├── Dockerfile
-├── docker-compose.yml
+ │   ├── **init**.py
+ │   ├── settings.py
+ │   ├── urls.py
 ├── seed.py
 ├── sanity_check.py
+├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
+├── README.md
+├── LICENSE
+
+**Author:**
+
+phkgh
