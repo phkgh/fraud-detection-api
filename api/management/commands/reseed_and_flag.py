@@ -12,6 +12,7 @@ NUM_JOBS = 100
 NUM_RESUMES = 50000
 NUM_IPS = 5000
 NUM_APPLICATIONS = 100000
+DUPLICATE_RATIO = 0.05  # 5% of applications will be duplicates
 
 
 class Command(BaseCommand):
@@ -38,25 +39,44 @@ class Command(BaseCommand):
         IPAddressLog.objects.bulk_create(ips)
         ips = list(IPAddressLog.objects.all())
 
-        self.stdout.write(
-            "📬 Creating job applications and flagging duplicates...")
-        seen = set()
-        applications = []
-        for _ in range(NUM_APPLICATIONS):
-            job = random.choice(jobs)
-            resume = random.choice(resumes)
-            ip = random.choice(ips)
-            key = (job.id, resume.id, ip.id)
-            is_flagged = key in seen
-            seen.add(key)
+        self.stdout.write("📬 Creating job applications with 5% duplicates...")
 
+        applications = []
+        unique_combos = set()
+
+        # Step 1: Create 95% unique combinations
+        while len(unique_combos) < int(NUM_APPLICATIONS * (1 - DUPLICATE_RATIO)):
+            key = (
+                random.choice(jobs).id,
+                random.choice(resumes).id,
+                random.choice(ips).id
+            )
+            unique_combos.add(key)
+
+        # Step 2: Add non-flagged applications
+        for job_id, resume_id, ip_id in unique_combos:
             applications.append(JobApplication(
-                job_post=job,
-                resume=resume,
-                ip_address=ip,
+                job_post_id=job_id,
+                resume_id=resume_id,
+                ip_address_id=ip_id,
                 timestamp=timezone.now(),
-                is_flagged=is_flagged
+                is_flagged=False
             ))
 
+        # Step 3: Add 5% flagged duplicates from existing combos
+        duplicate_combos = random.sample(
+            list(unique_combos), int(NUM_APPLICATIONS * DUPLICATE_RATIO))
+        for job_id, resume_id, ip_id in duplicate_combos:
+            applications.append(JobApplication(
+                job_post_id=job_id,
+                resume_id=resume_id,
+                ip_address_id=ip_id,
+                timestamp=timezone.now(),
+                is_flagged=True
+            ))
+
+        # Step 4: Shuffle and insert all
+        random.shuffle(applications)
         JobApplication.objects.bulk_create(applications, batch_size=1000)
+
         self.stdout.write(self.style.SUCCESS("✅ Done reseeding and flagging!"))
