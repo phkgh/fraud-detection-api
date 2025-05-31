@@ -9,15 +9,32 @@ This is a backend-only Django REST API that identifies and flags potentially fra
 - Built with Django and Django REST Framework (DRF)
 - Models: JobPost, Resume, IPAddressLog, JobApplication
 - Flags duplicate applications based on job, resume, and IP
-- Pagination, filtering, and ordering enabled
-- Custom management command for reseeding and flagging
+- Pagination, filtering, and ordering: Built-in Django REST Framework features for managing large datasets
+- Custom management command: reseed_and_flag flushes the database, reseeds data, and injects duplicates intentionally
 - Shell-tested logic to verify data accuracy
-- Aggregated `/api/stats/` endpoint
-- Full Docker support
-- Clean test coverage with `unittest`
+- Real-time statistics endpoint: /api/stats/ returns key metrics including total and flagged applications
+- Dockerized for deployment: PostgreSQL and Django containers
+- Unit tests: Covers flagging logic, views, and key behaviors
 - API-only, no frontend
+- Duplicate detection logic: Flags applications with the same job, resume, and IP combination
+- Realistic dataset: 100,000 applications, 50,000 resumes, 5,000 IPs, and 100 jobs seeded using Faker
+ 
 
 ---
+
+**Tech Stack**
+
+    - Python 3.10
+
+    - Django 4.x
+
+    - Django REST Framework
+
+    - PostgreSQL
+
+    - Docker and Docker Compose
+
+    - Faker (Python library)
 
 ## Quick Start
 
@@ -30,6 +47,7 @@ cd fraud-detection-api
 docker-compose up --build
 
 # Reseed fresh data and flag duplicates
+docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py reseed_and_flag
 
 # Run API locally at:
@@ -40,6 +58,44 @@ docker-compose exec web python manage.py reseed_and_flag
 
 ---
 
+**API Endpoints**
+
+    GET /api/jobs/ — List job posts
+
+    GET /api/resumes/ — List resumes
+
+    GET /api/applications/ — Paginated job applications
+
+    GET /api/stats/ — Real-time summary metrics
+
+---
+
+**Example curl request:**
+curl http://localhost:8000/api/stats/
+
+**Example JSON response:**
+{
+  "total_applications": 100000,
+  "unique_jobs": 100,
+  "unique_resumes": 50000,
+  "flagged_duplicates": 5000
+}
+
+---
+**Running Tests**
+docker-compose exec web python manage.py test
+-This command runs unit tests covering flagging logic, statistics endpoint, and application view behavior.
+
+---
+**Docker Architecture**
+
+    web: Django backend with Django REST Framework, Faker, and PostgreSQL connector
+
+    db: PostgreSQL service
+
+    Configuration files: .env, Dockerfile, docker-compose.yml
+
+---
 ## Project Structure
 
 ```
